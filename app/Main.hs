@@ -3,7 +3,7 @@ module Main (main) where
 import Text.Parsec
 import LambdaCalculus.Parse (parserLambdaCalculus, parseModule, toNormalForm)
 import LambdaCalculus.Interpret (evaluate, execute)
-import Control.Monad (forever, forM, void)
+import Control.Monad (forever, forM, void, unless)
 import qualified Data.Map as Map
 import System.Environment (getArgs)
 import System.Exit (exitFailure)
@@ -21,9 +21,9 @@ main = do
     else do
       sTermByIdentifier <- forM fileNames $ \fileName -> do
         fileContents <- readFile fileName
-        let smTerm = parseModule fileContents $ parse parserLambdaCalculus fileName
-        forM smTerm $ \case
-          Right term -> pure term
-          Left err -> print err *> exitFailure
+        let (errors, moduleScope) = parseModule fileName fileContents
+        unless (null errors) $ print errors *> exitFailure
+        pure moduleScope
       let allGlobals = (`foldMap` sTermByIdentifier) $ fmap $ evaluate allGlobals . toNormalForm
+      print $ Map.keysSet allGlobals
       void $ execute $ allGlobals Map.! "main"

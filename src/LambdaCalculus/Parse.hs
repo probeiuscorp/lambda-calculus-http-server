@@ -1,5 +1,6 @@
 module LambdaCalculus.Parse (parserLambdaCalculus, parseModule, NormalForm(..), toNormalForm) where
 
+import Text.Parsec
 import Text.Parsec.String
 import Text.Parsec.Char
 import Text.Parsec.Combinator
@@ -7,9 +8,11 @@ import Control.Applicative
 import qualified Text.Parsec.Token as T
 import qualified Data.List.NonEmpty as NE
 import Text.Parsec.Language (emptyDef)
+import Data.List (groupBy)
 import Data.List.NonEmpty (some1)
 import qualified Data.Set as Set
 import qualified Data.Map as Map
+import Data.Either (partitionEithers)
 
 data Term
   = TermIdentifier String
@@ -52,5 +55,18 @@ toNormalForm = \case
   TermApplication fn arg -> NFApplication (toNormalForm fn) (toNormalForm arg)
   TermAbstraction params body -> foldr NFAbstraction (toNormalForm body) params
 
-parseModule :: String -> (String -> a) -> Map.Map String a
-parseModule evaluate fileContents = undefined
+parserDeclaration :: Parser (String, Term)
+parserDeclaration = do
+  binding <- identifier
+  literal '='
+  term <- parserLambdaCalculus
+  pure (binding, term)
+
+parseModule :: String -> String -> ([ParseError], Map.Map String Term)
+parseModule fileName fileContents = (parseErrors, Map.fromList declarations)
+  where
+    nextLineHasLeadingWhitespace = const $ \case
+      (' ':_) -> True
+      _ -> False
+    declarationSources = fmap unlines $ groupBy nextLineHasLeadingWhitespace $ lines fileContents
+    (parseErrors, declarations) = partitionEithers $ parse parserDeclaration fileName <$> declarationSources
