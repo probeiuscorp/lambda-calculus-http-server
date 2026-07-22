@@ -1,4 +1,4 @@
-module LambdaCalculus.Parse (parserLambdaCalculus) where
+module LambdaCalculus.Parse (parserLambdaCalculus, parseModule, NormalForm(..), toNormalForm) where
 
 import Text.Parsec.String
 import Text.Parsec.Char
@@ -8,6 +8,8 @@ import qualified Text.Parsec.Token as T
 import qualified Data.List.NonEmpty as NE
 import Text.Parsec.Language (emptyDef)
 import Data.List.NonEmpty (some1)
+import qualified Data.Set as Set
+import qualified Data.Map as Map
 
 data Term
   = TermIdentifier String
@@ -17,8 +19,8 @@ data Term
 
 data NormalForm
   = NFIdentifier String
-  | NFAbstraction NormalForm NormalForm
-  | NFApplication String NormalForm
+  | NFAbstraction String NormalForm
+  | NFApplication NormalForm NormalForm
   deriving (Eq, Ord, Show)
 
 lexerDef :: T.TokenParser ()
@@ -43,3 +45,12 @@ simple = asum
   [ literal '(' *> parserLambdaCalculus <* literal ')'
   , TermIdentifier <$> identifier
   ]
+
+toNormalForm :: Term -> NormalForm
+toNormalForm = \case
+  TermIdentifier str -> NFIdentifier str
+  TermApplication fn arg -> NFApplication (toNormalForm fn) (toNormalForm arg)
+  TermAbstraction params body -> foldr NFAbstraction (toNormalForm body) params
+
+parseModule :: String -> (String -> a) -> Map.Map String a
+parseModule evaluate fileContents = undefined
