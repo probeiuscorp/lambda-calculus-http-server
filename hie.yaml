@@ -1,0 +1,8 @@
+cradle:
+  stack:
+    - path: app
+      component: lambda-calculus:exe:lambda-calculus-exe
+    - path: src
+      component: lambda-calculus:lib
+    - path: test
+      component: lambda-calculus:test:lambda-calculus-test
