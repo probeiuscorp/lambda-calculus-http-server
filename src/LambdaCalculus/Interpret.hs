@@ -56,7 +56,7 @@ intrinsics = Map.fromList
 execute :: Value -> IO Value
 execute = \case
   Intrinsic (IIO IOGetInt []) -> do
-    Intrinsic . INat . read <$> getLine
+    toChurchInt . read <$> getLine
   Intrinsic (IIO IOPutInt [vint]) -> do
     L id <$ print (fromChurchInt vint)
   Intrinsic (IIO IOPure [v]) -> pure v
@@ -64,6 +64,9 @@ execute = \case
     execute . app f =<< execute io
   val -> error $ "umatched IO: " <> show val
 
+toChurchInt :: Int -> Value
+toChurchInt 0 = L $ const $ L id
+toChurchInt n = L $ \f -> L $ \a -> f `app` (toChurchInt (n - 1) `app` f `app` a)
 fromChurchInt :: Value -> Int
 fromChurchInt val = let
   subject = val
