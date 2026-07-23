@@ -13,6 +13,7 @@ import Data.List.NonEmpty (some1)
 import qualified Data.Set as Set
 import qualified Data.Map as Map
 import Data.Either (partitionEithers)
+import Data.Char (isSpace)
 
 data Term
   = TermIdentifier String
@@ -68,5 +69,6 @@ parseModule fileName fileContents = (parseErrors, Map.fromList declarations)
     nextLineHasLeadingWhitespace = const $ \case
       (' ':_) -> True
       _ -> False
-    declarationSources = fmap unlines $ groupBy nextLineHasLeadingWhitespace $ lines fileContents
+    declarationSources = groupBy nextLineHasLeadingWhitespace (lines fileContents) >>= \linesGroup ->
+      ([unlines linesGroup | not (all (all isSpace) linesGroup)])
     (parseErrors, declarations) = partitionEithers $ parse parserDeclaration fileName <$> declarationSources

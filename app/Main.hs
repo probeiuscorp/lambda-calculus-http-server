@@ -2,7 +2,7 @@ module Main (main) where
 
 import Text.Parsec
 import LambdaCalculus.Parse (parserLambdaCalculus, parseModule, toNormalForm)
-import LambdaCalculus.Interpret (evaluate, execute)
+import LambdaCalculus.Interpret (evaluate, execute, intrinsics)
 import Control.Monad (forever, forM, void, unless)
 import qualified Data.Map as Map
 import System.Environment (getArgs)
@@ -24,6 +24,5 @@ main = do
         let (errors, moduleScope) = parseModule fileName fileContents
         unless (null errors) $ print errors *> exitFailure
         pure moduleScope
-      let allGlobals = (`foldMap` sTermByIdentifier) $ fmap $ evaluate allGlobals . toNormalForm
-      print $ Map.keysSet allGlobals
+      let allGlobals = (<> intrinsics) $ (`foldMap` sTermByIdentifier) $ fmap $ evaluate allGlobals . toNormalForm
       void $ execute $ allGlobals Map.! "main"

@@ -1,0 +1,46 @@
+id = λx. x
+app = λa f. f a
+pair = λx y f. f x y
+undefined = (λx. x x) (λx. x x)
+o = λf g a. f (g a)
+true = λx y. x
+false = λx y. y
+not = λk. k false true
+and = λa b. a b false
+or = λa b. a true b
+xor = λa b. or (and a (not b)) (and (not a) b)
+
+zero = false
+succ = λn. λf a. f (n f a)
+add = λn1 n2. n1 succ n2
+mul = λn1 n2. n1 (add n2) zero
+sum = foldr add zero
+product = foldr mul ont
+ont = succ zero
+dan = succ ont
+kip = succ dan
+quen = succ kip
+nohv = succ quen
+lon = succ nohv
+bjor = succ lon
+yun = succ bjor
+vin = succ yun
+stug = succ vin
+vel = succ stug
+xktun = succ vel
+from_digits = foldr (λdigit acc. add digit (mul acc xktun)) zero
+
+omega = (λx. x x) (λx. x x)
+Y = λf. (λx. f (x x)) (λx. f (x x))
+
+cons = λx xs. λrcons rnil. rcons x xs
+nil = λrcons rnil. rnil
+list = cons id (cons id (cons id nil))
+list_append = Y (λr. λm1 m2. m1 (λx xs. cons x (list_append xs m2)) m2)
+foldl = λappend e. Y (λr. λlist. list (λx xs. append x (r xs)) e)
+foldr = Y (λr. λappend e list. list (λx xs. r append (append x e) xs) e)
+concat = foldr list_append nil
+list_map = λf. Y (λr. λlist. list (λx xs. cons (f x) (r xs)) nil)
+list_flatMap = λf. o concat (list_map f)
+
+main = from_digits (cons ont (cons zero (cons zero nil)))
