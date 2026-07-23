@@ -8,7 +8,7 @@ import Control.Applicative
 import qualified Text.Parsec.Token as T
 import qualified Data.List.NonEmpty as NE
 import Text.Parsec.Language (emptyDef)
-import Data.List (groupBy)
+import Data.List (groupBy, isPrefixOf)
 import Data.List.NonEmpty (some1)
 import qualified Data.Set as Set
 import qualified Data.Map as Map
@@ -28,7 +28,9 @@ data NormalForm
   deriving (Eq, Ord, Show)
 
 lexerDef :: T.TokenParser ()
-lexerDef = T.makeTokenParser emptyDef
+lexerDef = T.makeTokenParser $ emptyDef
+  { T.commentLine  = "--"
+  }
 identifier = T.identifier lexerDef
 literal = T.lexeme lexerDef . satisfy . (==)
 
@@ -69,6 +71,6 @@ parseModule fileName fileContents = (parseErrors, Map.fromList declarations)
     nextLineHasLeadingWhitespace = const $ \case
       (' ':_) -> True
       _ -> False
-    declarationSources = groupBy nextLineHasLeadingWhitespace (lines fileContents) >>= \linesGroup ->
+    declarationSources = groupBy nextLineHasLeadingWhitespace (filter (not . isPrefixOf "--") $ lines fileContents) >>= \linesGroup ->
       ([unlines linesGroup | not (all (all isSpace) linesGroup)])
     (parseErrors, declarations) = partitionEithers $ parse parserDeclaration fileName <$> declarationSources

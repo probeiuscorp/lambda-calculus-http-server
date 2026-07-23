@@ -1,4 +1,5 @@
 id = λx. x
+const = true
 app = λa f. f a
 pair = λx y f. f x y
 undefined = (λx. x x) (λx. x x)
@@ -43,4 +44,6 @@ concat = foldr list_append nil
 list_map = λf. Y (λr. λlist. list (λx xs. cons (f x) (r xs)) nil)
 list_flatMap = λf. o concat (list_map f)
 
-main = from_digits (cons ont (cons zero (cons zero nil)))
+io_then = λma mb. io_flatMap ma (const mb)
+
+main = io_then (io_putInt stug) (io_putInt vel)
