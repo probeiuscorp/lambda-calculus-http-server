@@ -1,0 +1,19 @@
+-- "HTTP/1.1"
+httpVersion =
+  cons (from_digits (cons lon (cons zero nil))) (
+  cons (from_digits (cons bjor (cons zero nil))) (
+  cons (from_digits (cons bjor (cons zero nil))) (
+  cons (from_digits (cons lon (cons yun nil))) (
+  cons (from_digits (cons kip (cons vel nil))) (
+  cons (from_digits (cons quen (cons ont nil))) (
+  cons (from_digits (cons kip (cons stug nil))) (
+  cons (from_digits (cons quen (cons ont nil))) (
+  nil))))))))
+commaSep =
+  cons (from_digits (cons kip (cons yun nil))) (
+  cons (from_digits (cons dan (cons yun nil))) (
+  nil))
+reverse = foldl (flip cons) nil
+do_nothing = foldr cons nil
+
+main = io_putStrLn (intercalate (commaSep) (cons commaSep (cons httpVersion (cons httpVersion nil))))

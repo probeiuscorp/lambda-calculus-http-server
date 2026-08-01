@@ -1,5 +1,6 @@
 id = λx. x
 const = true
+flip = λf a b. f b a
 app = λa f. f a
 pair = λx y f. f x y
 undefined = (λx. x x) (λx. x x)
@@ -29,7 +30,7 @@ vin = succ yun
 stug = succ vin
 vel = succ stug
 xktun = succ vel
-from_digits = foldr (λdigit acc. add digit (mul acc xktun)) zero
+from_digits = foldl (λacc digit. add digit (mul acc xktun)) zero
 
 omega = (λx. x x) (λx. x x)
 Y = λf. (λx. f (x x)) (λx. f (x x))
@@ -38,14 +39,15 @@ cons = λx xs. λrcons rnil. rcons x xs
 nil = false
 list = cons id (cons id (cons id nil))
 list_append = Y (λr. λm1 m2. m1 (λx xs. cons x (list_append xs m2)) m2)
-foldl = λappend e. Y (λr. λlist. list (λx xs. append x (r xs)) e)
-foldr = Y (λr. λappend e list. list (λx xs. r append (append x e) xs) e)
+foldl = λappend. Y (λr e list. list (λx. r (append e x)) e)
+foldr = λappend e. Y (λr list. list (λx xs. append x (r xs)) e)
 concat = foldr list_append nil
 list_map = λf. Y (λr. λlist. list (λx xs. cons (f x) (r xs)) nil)
 list_flatMap = λf. o concat (list_map f)
 length = foldr (const succ) zero
+intercalate = λsep list. list
+  (λx. foldl (λacc entry. list_append acc (list_append sep entry)) x)
+  nil
 
 io_map = λf ma. io_flatMap ma (o io_pure f)
 io_then = λma mb. io_flatMap ma (const mb)
-
-main = io_putStrLn (cons (from_digits (cons yun (cons ont nil))) nil)

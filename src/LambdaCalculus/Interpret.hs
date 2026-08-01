@@ -67,7 +67,6 @@ execute = \case
   Intrinsic (IIO IOGetLine []) -> do
     toChurchList . fmap toChurchChar <$> getLine
   Intrinsic (IIO IOPutStrLn [vline]) -> do
-    print vline
     L id <$ putStrLn (fromChurchChar <$> fromChurchList vline)
   val -> error $ "unmatched IO: " <> show val
 
